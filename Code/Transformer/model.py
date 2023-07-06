@@ -1,23 +1,20 @@
 import torch.nn as nn
 
 
-
-
 class StockPriceTransformer(nn.Module):
     def __init__(self, input_size, nhead, num_layers, dim_feedforward, embedding_length):
         super(StockPriceTransformer, self).__init__()
 
-
         # self.positional_encoding = PositionalEncoding(embedding_length)
         self.embedding_length = embedding_length
-        self.embedding = nn.Linear(input_size,input_size * embedding_length)
+        self.embedding = nn.Linear(input_size, input_size * embedding_length)
         self.relu = nn.ReLU()
 
         self.encoder_layer = nn.TransformerEncoderLayer(
             embedding_length,
             nhead,
             dim_feedforward,
-            batch_first = True
+            batch_first=True
         )
         self.encoder = nn.TransformerEncoder(self.encoder_layer, num_layers)
         self.linear_1 = nn.Linear(embedding_length, input_size)
@@ -25,14 +22,12 @@ class StockPriceTransformer(nn.Module):
         self.tanh = nn.Tanh()
 
     def forward(self, src):
-
         batch_size, seq_length = src.size()
 
         src = self.embedding(src)
         src = self.relu(src)
 
         src = src.view(batch_size, seq_length, self.embedding_length)
-
 
         # src = self.positional_encoding(src)
 
@@ -42,12 +37,3 @@ class StockPriceTransformer(nn.Module):
         output = self.linear_2(output)
         output = self.tanh(output)
         output = output.squeeze()
-
-
-
-
-
-
-
-
-

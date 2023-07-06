@@ -18,18 +18,14 @@ class StockPriceDataset(Dataset):
 
     def __getitem__(self, index):
 
-
         start = index
         end = index + self.window_size
         window = self.data[:, start:end]
 
-
         masked_window, labels = self.mask_window(window)
 
-        
         # Add separator tokens to the input
         sep_tokens = torch.tensor([i * self.sep_token for i in range(1, window.shape[0] + 1)]).view(-1, 1)
-
 
         masked_window_with_sep = torch.cat((sep_tokens, masked_window), dim=1)
         labels = torch.cat((sep_tokens, labels), dim=1)
@@ -53,4 +49,3 @@ class StockPriceDataset(Dataset):
             labels.append(label_row)
 
         return torch.tensor(masked_window).float(), torch.tensor(labels).float()
-

@@ -17,11 +17,11 @@ class PositionalEncoding(nn.Module):
         rec_length = window_size + 1
         for k in range(seq_length):
             pos = k % rec_length
-            for j in range(int(d_model/2)):
-                denom = max_len **(2 * j/d_model)
-                pos_matrix[k, 2*j] = np.sin(pos/denom)
-                pos_matrix[k, 2*j + 1] = np.cos(pos/denom)
-        
+            for j in range(int(d_model / 2)):
+                denom = max_len ** (2 * j / d_model)
+                pos_matrix[k, 2 * j] = np.sin(pos / denom)
+                pos_matrix[k, 2 * j + 1] = np.cos(pos / denom)
+
         self.register_buffer('pe', pos_matrix)
         cax = plt.matshow(pos_matrix)
         plt.gcf().colorbar(cax)
@@ -35,21 +35,20 @@ class StockPriceTransformer(nn.Module):
     def __init__(self, input_size, nhead, num_layers, dim_feedforward, embedding_length, window_size):
         super(StockPriceTransformer, self).__init__()
 
-
-        # 1 x 40 -> where 40 is the sequence length 
+        # 1 x 40 -> where 40 is the sequence length
         # 1 is batch size
         # now we need to add dimension layer
 
         self.positional_encoding = PositionalEncoding(input_size, embedding_length, window_size)
         self.embedding_length = embedding_length
-        self.embedding = nn.Linear(input_size,input_size * embedding_length)
+        self.embedding = nn.Linear(input_size, input_size * embedding_length)
         self.relu = nn.ReLU()
 
         self.encoder_layer = nn.TransformerEncoderLayer(
             embedding_length,
             nhead,
             dim_feedforward,
-            batch_first = True
+            batch_first=True
         )
         self.encoder = nn.TransformerEncoder(self.encoder_layer, num_layers)
         self.linear_1 = nn.Linear(embedding_length, input_size)
@@ -57,13 +56,11 @@ class StockPriceTransformer(nn.Module):
         self.tanh = nn.Tanh()
 
     def forward(self, src):
-
         batch_size, seq_length = src.size()
 
         src = self.embedding(src)
         src = self.relu(src)
         src = src.view(batch_size, seq_length, self.embedding_length)
-
 
         src = self.positional_encoding(src)
 
@@ -74,8 +71,6 @@ class StockPriceTransformer(nn.Module):
         output = self.tanh(output)
         output = output.squeeze()
         return output
-
-
 
 
 class StockPriceDataset(Dataset):
@@ -91,18 +86,14 @@ class StockPriceDataset(Dataset):
 
     def __getitem__(self, index):
 
-
         start = index
         end = index + self.window_size
         window = self.data[:, start:end]
 
-
         masked_window, labels = self.mask_window(window)
 
-        
         # Add separator tokens to the input
         sep_tokens = torch.tensor([i * self.sep_token for i in range(1, window.shape[0] + 1)]).view(-1, 1)
-
 
         masked_window_with_sep = torch.cat((sep_tokens, masked_window), dim=1)
         labels = torch.cat((sep_tokens, labels), dim=1)
@@ -128,10 +119,8 @@ class StockPriceDataset(Dataset):
         return torch.tensor(masked_window).float(), torch.tensor(labels).float()
 
 
-
-
 ############## INSTANTIATE DATASET #################
-#data = np.random.rand(3, 4)  # Replace with your actual stock price data
+# data = np.random.rand(3, 4)  # Replace with your actual stock price data
 
 
 with open('JNJ.json') as f:
@@ -144,14 +133,11 @@ with open('JNJ.json') as f:
         temp_df = pd.json_normalize(df[key])
         list_of_dataframes.append(temp_df)
 
-    
     new_df = pd.concat(list_of_dataframes)
     print(new_df)
 
-
-# TURN INTO NP ARRAY; PASS ALONG KEYS AS LIST 
+# TURN INTO NP ARRAY; PASS ALONG KEYS AS LIST
 # MAKE APPROP CHANGES TO DICT 
-
 
 
 exit()
@@ -162,18 +148,16 @@ data = data / row_sums[:, np.newaxis]
 # print(data) # normalize data 
 
 
-window_size = 5 # number of days to look at
+window_size = 5  # number of days to look at
 batch_size = 2
 
 dataset = StockPriceDataset(data, window_size)
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-
-
 ################## INSTANTIATE MODEL ################
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-input_size = window_size* data.shape[0] + data.shape[0] # 
+input_size = window_size * data.shape[0] + data.shape[0]  #
 
 nhead = 8
 num_layers = 10
@@ -182,11 +166,10 @@ num_companies = data.shape[0]
 embedding_length = 128
 
 model = StockPriceTransformer(input_size, nhead, num_layers, dim_feedforward, embedding_length, window_size).to(device)
-loss_function = nn.MSELoss() # change loss function to L1
+loss_function = nn.MSELoss()  # change loss function to L1
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 
-
-#num_companies
+# num_companies
 num_epochs = 15
 
 for epoch in range(num_epochs):
@@ -199,7 +182,4 @@ for epoch in range(num_epochs):
         loss.backward()
         optimizer.step()
 
-
-    print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
-
-
+    print(f"Epoch: {epoch + 1}, Loss: {loss.item()}")

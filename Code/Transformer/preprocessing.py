@@ -25,7 +25,6 @@ df = pd.read_csv(file_name)
 
 df = df.dropna()
 
-
 KPIs = ['open', 'high', 'low', 'close', 'volume']
 sample_tensor = df[[KPIs[0], 'Name', 'date']]
 
@@ -35,10 +34,9 @@ dataset = {}
 
 company_name = []
 x = sample_tensor.groupby(['Name'])
-for name,x in x:
-    if len(x)== 1259:
+for name, x in x:
+    if len(x) == 1259:
         company_name.append(name)
-
 
 for kpi in KPIs:
 
@@ -46,7 +44,7 @@ for kpi in KPIs:
     sample_tensor = df[[kpi, 'Name', 'date']]
     x = sample_tensor.groupby(['Name'])
     company_dataframes = [d for _, d in x]
-    
+
     ####### GET LENGTHS ##########
     lengths = {}
     for comp in company_dataframes:
@@ -57,8 +55,6 @@ for kpi in KPIs:
             lengths[c] = 1
     print('length: ', lengths)
 
-
-
     ####### GET COMPANIES ##########
     company_sep_token = {}
     i = 0.02
@@ -68,17 +64,14 @@ for kpi in KPIs:
             i += 0.02
     print(company_sep_token)
 
-
-
-
     ####### GET KPI MATRIX ##########
-    
+
     kpi_matrix = np.empty([0, max(lengths)])
     for company in company_dataframes:
         if len(company) != max(lengths):
             continue
         kpi_matrix = np.vstack([kpi_matrix, company[kpi].to_numpy()])
-    
+
     dataset[kpi] = {
         'data': kpi_matrix,
         'company': company_sep_token
@@ -86,5 +79,4 @@ for kpi in KPIs:
 
 dumped = json.dumps(dataset, default=default)
 with open('processed_stock_dataset.json', 'w') as f:
-    json.dump(dumped, f, indent = 6)
-
+    json.dump(dumped, f, indent=6)
