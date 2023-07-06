@@ -1,5 +1,4 @@
 import yfinance as yf
-import pandas as pd
 
 
 # give dataframe with news articles get stocks
@@ -31,5 +30,4 @@ for ticker in company_tickers:
         stock_data.to_csv(ticker + '.csv')
     except Exception as e:
         print(e)
-        break
         print(ticker)
