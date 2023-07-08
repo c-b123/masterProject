@@ -59,3 +59,10 @@ df = pd.merge(df, comp_info, on=["date", "stock"], how='left')
 
 # Drop rows containing no price information
 df.dropna(inplace=True, ignore_index=True)
+
+
+########################################################################################################################
+# Store dataframe
+########################################################################################################################
+
+# df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_with_price.csv")
