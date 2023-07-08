@@ -1,11 +1,11 @@
-'''
+"""
 
-Take CSV file containing stock prices and convert to numpy array 
-Numpy array is saved as json file 
+Take CSV file containing stock prices and convert to numpy array
+Numpy array is saved as json file
 
 
 
-'''
+"""
 import pandas as pd
 import numpy as np
 import json

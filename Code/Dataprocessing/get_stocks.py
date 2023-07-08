@@ -1,5 +1,5 @@
 import yfinance as yf
-import stocks as sto
+import ressources as r
 
 
 # give dataframe with news articles get stocks
@@ -17,7 +17,7 @@ def get_stock_data(ticker, start_date, end_date):
 start_date = "2010-01-01"  # Start date for news and stock data
 end_date = "2023-04-18"  # End date for news and stock data
 
-for ticker in sto.company_tickers:
+for ticker in r.company_tickers:
     try:
         stock_data = get_stock_data(ticker, start_date, end_date)
         stock_data.to_csv(ticker + '.csv')
