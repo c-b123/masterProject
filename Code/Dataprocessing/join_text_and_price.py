@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import ressources as r
 
 ########################################################################################################################
@@ -38,6 +39,10 @@ for ticker in r.company_tickers:
     # Lower case to allow merging on data and ticker
     df2.rename(str.lower, axis='columns', inplace=True)
 
+    # Calculate return and log return
+    df2["return"] = df2["adj close"].pct_change()
+    df2["log_return"] = np.log(1 + df2["return"])
+
     # Concatenate all companies with single company
     comp_info = pd.concat([comp_info, df2])
 
@@ -58,6 +63,7 @@ comp_info = comp_info.astype(str)
 df = pd.merge(df, comp_info, on=["date", "stock"], how='left')
 
 # Drop rows containing no price information
+df.replace(["NaN", "nan"], pd.NA, inplace=True)
 df.dropna(inplace=True, ignore_index=True)
 
 
@@ -65,4 +71,4 @@ df.dropna(inplace=True, ignore_index=True)
 # Store dataframe
 ########################################################################################################################
 
-# df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_with_price.csv")
+df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_with_price.csv")
