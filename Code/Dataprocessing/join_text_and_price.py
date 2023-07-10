@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import ressources as r
+import resources as r
 
 ########################################################################################################################
 # Prepare analyst_ratings_processed.csv for merge with price data
@@ -13,12 +13,18 @@ df = pd.read_csv(file_name, usecols=[1, 2, 3])
 # Drop rows containing nan
 df.dropna(inplace=True)
 
+# Drop stocks which have less than 500 data entries
+df = df.groupby('stock').filter(lambda x: len(x) >= 500)
+
 # Convert from datetime to date format
 df['date'] = pd.to_datetime(df['date'])
 df['date'] = pd.to_datetime(df['date'], utc=True).dt.date
 
 # Convert "date" column to type str to allow merging
 df['date'].astype(str)
+
+# Drop stocks which have less than 360 (1 year) unique dates
+df = df.groupby('stock').filter(lambda x: x['date'].nunique() >= 360)
 
 
 ########################################################################################################################

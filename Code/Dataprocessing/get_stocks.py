@@ -1,5 +1,5 @@
 import yfinance as yf
-import ressources as r
+import resources as r
 
 
 # give dataframe with news articles get stocks
