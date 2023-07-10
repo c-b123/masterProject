@@ -32,7 +32,7 @@ comp_info = pd.DataFrame(columns=["date", "stock", "open", "high", "low", "close
                                   "log_return"])
 
 # Concatenate each stock data file to one large stock file
-for ticker in df["stock"].unique().tolist()[0:9]:
+for ticker in df["stock"].unique().tolist():
     # Fetch stock data from yahoo
     sdata = sd.get_stock_data(ticker, start_date="2010-01-01", end_date="2020-12-31")
 
@@ -69,4 +69,4 @@ del comp_info
 # Store dataframe as csv
 ########################################################################################################################
 
-# df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_with_price.csv")
+df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_with_price.csv")
