@@ -10,15 +10,19 @@ class StockPriceTransformer(nn.Module):
         self.embedding = nn.Linear(input_size, input_size * embedding_length)
         self.relu = nn.ReLU()
 
+        # Encoder
         self.encoder_layer = nn.TransformerEncoderLayer(
             embedding_length,
             nhead,
             dim_feedforward,
             batch_first=True
         )
+        # Repeating blocks of encoders
         self.encoder = nn.TransformerEncoder(self.encoder_layer, num_layers)
+        # Linear layer
         self.linear_1 = nn.Linear(embedding_length, input_size)
         self.linear_2 = nn.Linear(input_size, 1)
+        # Instead of softmax
         self.tanh = nn.Tanh()
 
     def forward(self, src):

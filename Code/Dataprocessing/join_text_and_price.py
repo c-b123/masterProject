@@ -71,4 +71,4 @@ df.dropna(inplace=True, ignore_index=True)
 # Store dataframe
 ########################################################################################################################
 
-df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_with_price.csv")
+# df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_with_price.csv")
