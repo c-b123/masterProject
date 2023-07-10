@@ -1,6 +1,5 @@
 import pandas as pd
-import numpy as np
-import resources as r
+import stockdata as sd
 
 ########################################################################################################################
 # Prepare analyst_ratings_processed.csv for merge with price data
@@ -12,9 +11,6 @@ df = pd.read_csv(file_name, usecols=[1, 2, 3])
 
 # Drop rows containing nan
 df.dropna(inplace=True)
-
-# Drop stocks which have less than 500 data entries
-df = df.groupby('stock').filter(lambda x: len(x) >= 500)
 
 # Convert from datetime to date format
 df['date'] = pd.to_datetime(df['date'])
@@ -28,33 +24,26 @@ df = df.groupby('stock').filter(lambda x: x['date'].nunique() >= 360)
 
 
 ########################################################################################################################
-# Concatenate all company info files
+# Concatenate stock data into on large file
 ########################################################################################################################
 
 # Create empty data frame with required columns
-comp_info = pd.DataFrame(columns=["date", "stock", "open", "high", "low", "close", "adj close", "volume"])
+comp_info = pd.DataFrame(columns=["date", "stock", "open", "high", "low", "close", "adj close", "volume", "return",
+                                  "log_return"])
 
-for ticker in r.company_tickers:
-    # Read company info
-    file = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\Company info\\" + ticker + ".csv"
-    df2 = pd.read_csv(file)
+# Concatenate each stock data file to one large stock file
+for ticker in df["stock"].unique().tolist()[0:9]:
+    # Fetch stock data from yahoo
+    sdata = sd.get_stock_data(ticker, start_date="2010-01-01", end_date="2020-12-31")
 
     # Add company ticker to allow merging on data and ticker
-    df2.insert(1, 'stock', ticker)
-
-    # Lower case to allow merging on data and ticker
-    df2.rename(str.lower, axis='columns', inplace=True)
-
-    # Calculate return and log return
-    df2["return"] = df2["adj close"].pct_change()
-    df2["log_return"] = np.log(1 + df2["return"])
+    sdata.insert(1, 'stock', ticker)
 
     # Concatenate all companies with single company
-    comp_info = pd.concat([comp_info, df2])
+    comp_info = pd.concat([comp_info, sdata])
 
-    # Delete variables
-    del file
-    del df2
+    # Delete auxiliary dataframe
+    del sdata
 
 
 ########################################################################################################################
@@ -72,9 +61,12 @@ df = pd.merge(df, comp_info, on=["date", "stock"], how='left')
 df.replace(["NaN", "nan"], pd.NA, inplace=True)
 df.dropna(inplace=True, ignore_index=True)
 
+# Delete auxiliary dataframe
+del comp_info
+
 
 ########################################################################################################################
-# Store dataframe
+# Store dataframe as csv
 ########################################################################################################################
 
 # df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_with_price.csv")
