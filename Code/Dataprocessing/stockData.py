@@ -17,7 +17,7 @@ def get_stock_data(ticker, start_date, end_date):
 
     Returns
     -------
-    object
+    pandas.DataFrame
         dataframe with date, open, high, low, close, adjusted close, and volume as columns
     """
 
