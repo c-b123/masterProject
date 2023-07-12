@@ -2,29 +2,39 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from sklearn import metrics
-from sklearn.metrics import classification_report
-from sklearn.model_selection import train_test_split, RepeatedStratifiedKFold, cross_val_score
+from sklearn.model_selection import RepeatedStratifiedKFold, cross_val_score
 
 # https://machinelearningmastery.com/multinomial-logistic-regression-with-python/
+# https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
 
 # Read with finBERT labelled csv file
 file = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_labelled.csv"
 df = pd.read_csv(file, index_col=0)
 
-# Define independent and dependent variable
-independent = ["open", "high", "low", "close", "adj close", "volume", "return", "log_return"]
-X = df.loc[:, df.columns.isin(independent)]
-y = df.loc[:, df.columns == "finBERT"]
-
 
 ########################################################################################################################
-# Data exploration
+# Balance dataset and define independent variables
 ########################################################################################################################
+
+def balance_dataframe(df, target_column):
+    class_counts = df[target_column].value_counts()
+    min_class_count = class_counts.min()
+    balanced_df = df.groupby(target_column).apply(lambda x: x.sample(min_class_count, random_state=42))
+    balanced_df = balanced_df.sample(frac=1, random_state=42).reset_index(drop=True)
+    return balanced_df
+
+
+# Apply balancing to dataset
+df = balance_dataframe(df, 'finBERT')
 
 # Show the distribution of positive, neutral and negative labels
 df["finBERT"].value_counts().plot(kind="bar")
 plt.show()
+
+# Define independent and dependent variable
+independent = ["open", "high", "low", "close", "adj close", "volume", "return", "log_return"]
+X = df.loc[:, df.columns.isin(independent)].values
+y = df.loc[:, df.columns == "finBERT"].values.ravel()
 
 
 ########################################################################################################################
@@ -38,10 +48,11 @@ model = LogisticRegression(multi_class='multinomial', solver='lbfgs')
 cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
 
 # Evaluate the model and collect the scores
-n_scores = cross_val_score(model, X, np.ravel(y), scoring='accuracy', cv=cv, n_jobs=-1)
+n_scores = cross_val_score(model, X, y, scoring='accuracy', cv=cv, n_jobs=-1)
 
 # Report performance
-print('Mean Accuracy for Multinomial Logistic Regression: %.3f (%.3f)' % (np.mean(n_scores), np.std(n_scores)))
+print('Accuracy for Multinomial Logistic Regression:\n'
+      '{0:.3f} ({1:.3f})'.format(np.mean(n_scores), np.std(n_scores)))
 
 
 ########################################################################################################################
@@ -55,7 +66,6 @@ def get_models():
         # Create name for model
         key = '%.4f' % p
 
-        # Turn off penalty in some cases
         if p == 0.0:
             # No penalty in this case
             models[key] = LogisticRegression(multi_class='multinomial', solver='lbfgs', penalty=None)
@@ -65,7 +75,7 @@ def get_models():
     return models
 
 
-# evaluate a give model using cross-validation
+# Evaluate a given model using cross-validation
 def evaluate_model(model, X, y):
     # define the evaluation procedure
     cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
@@ -75,28 +85,20 @@ def evaluate_model(model, X, y):
     return scores
 
 
-# get the models to evaluate
+# Get the models to evaluate
 models = get_models()
-# evaluate the models and store results
+
+# Evaluate the models and store results
 results, names = list(), list()
+print("Accuracy for Multinomial Logistic Regression with regularization:")
 for name, model in models.items():
-    # evaluate the model and collect the scores
-    scores = evaluate_model(model, X, np.ravel(y))
-    # store the results
+    # Evaluate the model and collect the scores
+    scores = evaluate_model(model, X, y)
+    # Store the results
     results.append(scores)
     names.append(name)
-    # summarize progress along the way
-    print('>%s %.3f (%.3f)' % (name, np.mean(scores), np.std(scores)))
-
-
-########################################################################################################################
-# Ordinal Logistic Regression
-########################################################################################################################
-
-
-########################################################################################################################
-# Ordinal Logistic Regression with regularization
-########################################################################################################################
+    # Summarize progress along the way
+    print('>{0} {1:.3f} ({2:.3f})'.format(name, np.mean(scores), np.std(scores)))
 
 
 ########################################################################################################################
@@ -104,4 +106,8 @@ for name, model in models.items():
 ########################################################################################################################
 
 # add more KPIs with Pyfolio
+# add S&P500 return as KPI
 # only positive and negative
+# balance dataset
+# try ordinal logistic regression
+# lag data
