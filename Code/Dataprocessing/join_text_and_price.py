@@ -69,4 +69,4 @@ del comp_info
 # Store dataframe as csv
 ########################################################################################################################
 
-df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_with_price.csv")
+# df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_with_price.csv")
