@@ -77,4 +77,4 @@ result_df['date'].astype(str)
 result_df.set_index("date", inplace=True)
 
 # Store the results as csv file
-result_df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\sp500_kpis.csv")
+# result_df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\sp500_kpis.csv")

@@ -2,7 +2,7 @@ from datasets import load_dataset
 from transformers import pipeline
 
 # Read dataset
-d = load_dataset("csv", data_files="C:/Users/chris/IdeaProjects/masterProject/Dataset/analyst_ratings_with_price.csv")
+d = load_dataset("csv", data_files="C:/Users/chris/IdeaProjects/masterProject/Dataset/ar_price.csv")
 
 # Initialize the pipeline with finBERT
 pipe = pipeline(model="ProsusAI/finbert", tokenizer='ProsusAI/finbert')

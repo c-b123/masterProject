@@ -2,11 +2,11 @@ import pandas as pd
 import stockdata as sd
 
 ########################################################################################################################
-# Prepare analyst_ratings_processed.csv for merge with price data
+# Prepare ar_processed.csv for merge with price data
 ########################################################################################################################
 
 # Read analyst_ratings_processed file
-file_name = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_processed.csv"
+file_name = r"/Dataset/ar_processed.csv"
 df = pd.read_csv(file_name, usecols=[1, 2, 3])
 
 # Drop rows containing nan
@@ -69,4 +69,4 @@ del comp_info
 # Store dataframe as csv
 ########################################################################################################################
 
-# df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_with_price.csv")
+# df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\ar_price.csv")
