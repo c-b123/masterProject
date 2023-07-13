@@ -1,15 +1,18 @@
 import pandas as pd
 import yfinance as yf
+import yfinance.shared as shared
 import resources as r
 
 
 def calculate_statistics(symbols, start_date, end_date):
     # Initialize an empty DataFrame to store daily returns
     returns_df = pd.DataFrame()
+    errors = []
 
     # Iterate over symbols and download historical stock data
     for symbol in symbols:
         stock_data = yf.download(symbol, start=start_date, end=end_date)
+        errors.extend(list(shared._ERRORS.keys()))
 
         # Calculate daily returns
         stock_data['Daily_Return'] = stock_data['Adj Close'].pct_change()
@@ -27,7 +30,8 @@ def calculate_statistics(symbols, start_date, end_date):
             returns_df.rename(columns={'Daily_Return': symbol}, inplace=True)
             returns_df.set_index('Date', inplace=True)
         else:
-            returns_df = returns_df.merge(stock_data[['Date', 'Daily_Return']], left_index=True, right_on='Date', how='left')
+            returns_df = returns_df.merge(stock_data[['Date', 'Daily_Return']], left_index=True, right_on='Date',
+                                          how='left')
             returns_df.rename(columns={'Daily_Return': symbol}, inplace=True)
             returns_df.set_index('Date', inplace=True)
 
@@ -39,18 +43,15 @@ def calculate_statistics(symbols, start_date, end_date):
     for percentile in percentiles:
         statistics[f'{int(percentile * 100)}th Percentile'] = returns_df.quantile(percentile, axis=1)
 
-    return statistics
+    return statistics, errors
 
-
-# Define the list of S&P 500 symbols
-sp500_symbols = ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'FB']  # Add more symbols as needed
 
 # Define the date range
 start_date = '2010-01-01'
-end_date = '2010-02-28'
+end_date = '2020-12-31'
 
 # Calculate the statistics
-stats = calculate_statistics(r.sp500, start_date, end_date)
+stats, errors = calculate_statistics(r.sp500, start_date, end_date)
 
 # Create a DataFrame to store the results
 result_df = pd.DataFrame({'Date': stats.index,
@@ -62,8 +63,18 @@ result_df = pd.DataFrame({'Date': stats.index,
                           '75th_Percentile': stats['75th Percentile'],
                           '90th_Percentile': stats['90th Percentile']})
 
-result_df.set_index("Date", inplace=True)
+# Lower all column names
 result_df.rename(str.lower, axis='columns', inplace=True)
 
-# Print the results
-print(result_df)
+# Convert from datetime to date format
+result_df['date'] = pd.to_datetime(result_df['date'])
+result_df['date'] = pd.to_datetime(result_df['date'], utc=True).dt.date
+
+# Convert "date" column to type str
+result_df['date'].astype(str)
+
+# Reset index to date
+result_df.set_index("date", inplace=True)
+
+# Store the results as csv file
+result_df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\sp500_kpis.csv")
