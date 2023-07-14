@@ -153,3 +153,4 @@ for name, model in models.items():
 # try ordinal logistic regression
 # lag data
 # Standardizing/Normalize - done
+# use window of returns for independent variable
