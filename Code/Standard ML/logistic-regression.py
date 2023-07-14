@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import RepeatedStratifiedKFold, cross_val_score
+from sklearn.preprocessing import StandardScaler
 
 # https://machinelearningmastery.com/multinomial-logistic-regression-with-python/
 # https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
 
 # Read with finBERT labelled csv file
-file = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\analyst_ratings_labelled.csv"
+file = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\ar_labelled_market.csv"
 df = pd.read_csv(file, index_col=0)
 
 
@@ -31,10 +32,19 @@ df = balance_dataframe(df, 'finBERT')
 df["finBERT"].value_counts().plot(kind="bar")
 plt.show()
 
+# Create dummy variables
+df["finBERT"] = pd.factorize(df["finBERT"])[0]
+
 # Define independent and dependent variable
-independent = ["open", "high", "low", "close", "adj close", "volume", "return", "log_return"]
-X = df.loc[:, df.columns.isin(independent)].values
+independent1 = ['open', 'high', 'low', 'close', 'adj close', 'volume', 'return', 'log_return', 'sp_mean',
+                'sp_var', 'sp_10_pct', 'sp_25_pct', 'sp_50_pct', 'sp_75_pct', 'sp_90_pct']
+independent2 = ['return', 'sp_25_pct', 'sp_75_pct']
+X = df.loc[:, df.columns.isin(independent2)].values
 y = df.loc[:, df.columns == "finBERT"].values.ravel()
+
+# Standardize independent variable
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
 
 
 ########################################################################################################################
@@ -111,3 +121,4 @@ for name, model in models.items():
 # balance dataset
 # try ordinal logistic regression
 # lag data
+# Standardizing/Normalize
