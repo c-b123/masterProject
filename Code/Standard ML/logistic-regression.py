@@ -2,8 +2,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import RepeatedStratifiedKFold, cross_val_score
+from sklearn.model_selection import RepeatedStratifiedKFold, cross_val_score, train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report
 
 # https://machinelearningmastery.com/multinomial-logistic-regression-with-python/
 # https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
@@ -12,10 +13,18 @@ from sklearn.preprocessing import StandardScaler
 file = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\ar_labelled_market.csv"
 df = pd.read_csv(file, index_col=0)
 
+# Convert finBERT labels into categorical variable
+df["finBERT"] = pd.Categorical(df["finBERT"], ordered=True, categories=["negative", "neutral", "positive"])
+
+# Only take data for only specific stock
+# print(df["stock"].value_counts())
+# df = df.loc[df["stock"] == "MRK"]
+
 
 ########################################################################################################################
 # Balance dataset and define independent variables
 ########################################################################################################################
+
 
 def balance_dataframe(df, target_column):
     class_counts = df[target_column].value_counts()
@@ -32,24 +41,47 @@ df = balance_dataframe(df, 'finBERT')
 df["finBERT"].value_counts().plot(kind="bar")
 plt.show()
 
-# Create dummy variables
-df["finBERT"] = pd.factorize(df["finBERT"])[0]
-
 # Define independent and dependent variable
 independent1 = ['open', 'high', 'low', 'close', 'adj close', 'volume', 'return', 'log_return', 'sp_mean',
                 'sp_var', 'sp_10_pct', 'sp_25_pct', 'sp_50_pct', 'sp_75_pct', 'sp_90_pct']
-independent2 = ['return', 'sp_25_pct', 'sp_75_pct']
+independent2 = ['return', 'sp_var', 'sp_25_pct', 'sp_75_pct']
 X = df.loc[:, df.columns.isin(independent2)].values
 y = df.loc[:, df.columns == "finBERT"].values.ravel()
-
-# Standardize independent variable
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
 
 
 ########################################################################################################################
 # Multinomial Logistic Regression
 ########################################################################################################################
+
+# Create train and test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, shuffle=True)
+
+# Standardize independent variable
+scaler = StandardScaler()
+scaler.fit(X_train)
+scaler.transform(X_train)
+scaler.transform(X_test)
+
+# Define Multinomial Logistic Regression model
+model = LogisticRegression(multi_class='multinomial', solver='lbfgs')
+
+# Fit the model
+model.fit(X_train, y_train)
+
+# Make predictions
+y_hat = model.predict(X_test)
+
+# Get classification report
+print(classification_report(y_test, y_hat, target_names=["negative", "neutral", "positive"]))
+
+
+########################################################################################################################
+# Multinomial Logistic Regression with KFold validation
+########################################################################################################################
+
+# Standardize independent variable
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
 
 # Define Multinomial Logistic Regression model
 model = LogisticRegression(multi_class='multinomial', solver='lbfgs')
@@ -110,15 +142,14 @@ for name, model in models.items():
     # Summarize progress along the way
     print('>{0} {1:.3f} ({2:.3f})'.format(name, np.mean(scores), np.std(scores)))
 
-
 ########################################################################################################################
 # Further ideas
 ########################################################################################################################
 
 # add more KPIs with Pyfolio
-# add S&P500 return as KPI
+# add S&P500 return as KPI -done
 # only positive and negative
-# balance dataset
+# balance dataset - done
 # try ordinal logistic regression
 # lag data
-# Standardizing/Normalize
+# Standardizing/Normalize - done
