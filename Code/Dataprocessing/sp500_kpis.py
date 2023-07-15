@@ -39,7 +39,7 @@ def calculate_statistics(symbols, start_date, end_date):
     statistics = pd.DataFrame()
     statistics['Mean'] = returns_df.mean(axis=1)
     statistics['Variance'] = returns_df.var(axis=1)
-    percentiles = [0.1, 0.25, 0.5, 0.75, 0.9]
+    percentiles = [0.1, 0.2, 0.25, 0.5, 0.75, 0.8, 0.9]
     for percentile in percentiles:
         statistics[f'{int(percentile * 100)}th Percentile'] = returns_df.quantile(percentile, axis=1)
 
@@ -58,9 +58,11 @@ result_df = pd.DataFrame({'Date': stats.index,
                           'Mean': stats['Mean'],
                           'Variance': stats['Variance'],
                           '10th_Percentile': stats['10th Percentile'],
+                          '20th_Percentile': stats['10th Percentile'],
                           '25th_Percentile': stats['25th Percentile'],
                           '50th_Percentile': stats['50th Percentile'],
                           '75th_Percentile': stats['75th Percentile'],
+                          '80th_Percentile': stats['75th Percentile'],
                           '90th_Percentile': stats['90th Percentile']})
 
 # Lower all column names
