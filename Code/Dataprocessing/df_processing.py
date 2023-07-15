@@ -1,6 +1,70 @@
 import pandas
 
 
+def get_window_data(dataframe: pandas.DataFrame, exclude_columns: list, window_length: str, center: bool,
+                    squeezing_method: str):
+
+    # Exclude columns
+    rolling_columns = [column for column in dataframe.columns if column not in exclude_columns]
+
+    if squeezing_method == 'mean':
+        dataframe[rolling_columns] = dataframe[rolling_columns].rolling(window=window_length, center=center).mean()
+    elif squeezing_method == 'sum':
+        dataframe[rolling_columns] = dataframe[rolling_columns].rolling(window=window_length, center=center).sum()
+    elif squeezing_method == 'max':
+        dataframe[rolling_columns] = dataframe[rolling_columns].rolling(window=window_length, center=center).max()
+    elif squeezing_method == 'min':
+        dataframe[rolling_columns] = dataframe[rolling_columns].rolling(window=window_length, center=center).min()
+    elif squeezing_method == 'median':
+        dataframe[rolling_columns] = dataframe[rolling_columns].rolling(window=window_length, center=center).median()
+    else:
+        raise ValueError(f"Invalid squeezing method specified: {squeezing_method}")
+
+    dataframe.dropna(inplace=True, ignore_index=True)
+
+    return dataframe
+
+
+def lag_dataframe(dataframe: pandas.DataFrame, non_lag_columns: list, num_lag_steps: int):
+    """
+    Lags all non-excluded columns of a pandas dataframe.
+
+    Parameters
+    ----------
+    dataframe : pandas.DataFrame
+        A pandas dataframe with at least one column.
+    non_lag_columns : list
+        List of all columns which should not get lagged.
+    num_lag_steps : str
+        Integer indicating the number of lagging steps.
+
+    Returns
+    -------
+    pandas.DataFrame
+        returns pandas dataframe
+
+    Raises
+    -------
+    ValueError
+        if non-existing column name is specified
+    """
+
+    lagged_dataframe = dataframe.copy()
+
+    # Validate if non-existing columns are specified
+    invalid_columns = [col for col in non_lag_columns if col not in dataframe.columns]
+    if invalid_columns:
+        raise ValueError(f"Invalid column(s) specified: {', '.join(invalid_columns)}")
+
+    # Apply lagging
+    for column in dataframe.columns:
+        if column not in non_lag_columns:
+            for lag_step in range(1, num_lag_steps + 1):
+                lagged_dataframe[column] = dataframe[column].shift(lag_step)
+
+    return lagged_dataframe
+
+
 def balance_dataframe(dataframe: pandas.DataFrame, target_column: str):
     """
     Balances a pandas dataframe according to the specified target column. Requires a target column. Balancing is done
