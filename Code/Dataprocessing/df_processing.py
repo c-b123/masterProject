@@ -1,24 +1,62 @@
 import pandas
 
 
-def get_window_data(dataframe: pandas.DataFrame, exclude_columns: list, window_length: str, center: bool,
-                    squeezing_method: str):
+def get_window_data(dataframe: pandas.DataFrame, column_methods: dict, window_length: int,
+                    group_column: str, center=True):
+    """
+    This function rolls a window over the specified dataframe. It calculates the mean, max, min, ... inside this window.
 
-    # Exclude columns
-    rolling_columns = [column for column in dataframe.columns if column not in exclude_columns]
+    Parameters
+    ----------
+    dataframe : pandas.DataFrame
+        A pandas dataframe with at least two columns.
+    column_methods : dict
+        A dictionary listing which statistical methods should get applied to which column.
+    window_length : int
+        Integer indicating the length of the rolling window.
+    group_column : str
+        The column name which is used for grouping the windows.
+    center : bool
+        Boolean indicating whether the rolling window should be centered. Default: True.
 
-    if squeezing_method == 'mean':
-        dataframe[rolling_columns] = dataframe[rolling_columns].rolling(window=window_length, center=center).mean()
-    elif squeezing_method == 'sum':
-        dataframe[rolling_columns] = dataframe[rolling_columns].rolling(window=window_length, center=center).sum()
-    elif squeezing_method == 'max':
-        dataframe[rolling_columns] = dataframe[rolling_columns].rolling(window=window_length, center=center).max()
-    elif squeezing_method == 'min':
-        dataframe[rolling_columns] = dataframe[rolling_columns].rolling(window=window_length, center=center).min()
-    elif squeezing_method == 'median':
-        dataframe[rolling_columns] = dataframe[rolling_columns].rolling(window=window_length, center=center).median()
-    else:
-        raise ValueError(f"Invalid squeezing method specified: {squeezing_method}")
+    Returns
+    -------
+    pandas.DataFrame
+        returns a pandas dataframe
+
+    Raises
+    -------
+    ValueError
+        if squeezing method is not specified or if column name does not exist
+    """
+    # Raise ValueError if group column does not exist
+    if group_column not in dataframe.columns:
+        raise ValueError(f"Invalid group column specified: {group_column}")
+
+    # Group columns
+    groups = dataframe.groupby(group_column)
+
+    for column, squeezing_method in column_methods.items():
+        # Raise ValueError if column name in dictionary does not exist
+        if column not in dataframe.columns:
+            raise ValueError(f"Invalid column specified: {column}")
+        if squeezing_method == 'mean':
+            dataframe[column] = groups[column].rolling(window=window_length, center=center).mean().reset_index(
+                level=0, drop=True)
+        elif squeezing_method == 'sum':
+            dataframe[column] = groups[column].rolling(window=window_length, center=center).sum().reset_index(level=0,
+                                                                                                              drop=True)
+        elif squeezing_method == 'max':
+            dataframe[column] = groups[column].rolling(window=window_length, center=center).max().reset_index(level=0,
+                                                                                                              drop=True)
+        elif squeezing_method == 'min':
+            dataframe[column] = groups[column].rolling(window=window_length, center=center).min().reset_index(level=0,
+                                                                                                              drop=True)
+        elif squeezing_method == 'median':
+            dataframe[column] = groups[column].rolling(window=window_length, center=center).median().reset_index(
+                level=0, drop=True)
+        else:
+            raise ValueError(f"Invalid squeezing method specified for column {column}: {squeezing_method}")
 
     dataframe.dropna(inplace=True, ignore_index=True)
 
