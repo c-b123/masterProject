@@ -2,7 +2,7 @@ import pandas
 
 
 def get_window_data(dataframe: pandas.DataFrame, column_methods: dict, window_length: int,
-                    group_column: str, center=True):
+                    group_column="stock", center=True):
     """
     This function rolls a window over the specified dataframe. It calculates the mean, max, min, ... inside this window.
 
@@ -15,7 +15,7 @@ def get_window_data(dataframe: pandas.DataFrame, column_methods: dict, window_le
     window_length : int
         Integer indicating the length of the rolling window.
     group_column : str
-        The column name which is used for grouping the windows.
+        The column name which is used for grouping the windows. Default: "stock"
     center : bool
         Boolean indicating whether the rolling window should be centered. Default: True.
 

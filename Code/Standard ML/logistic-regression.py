@@ -27,14 +27,22 @@ df["finBERT"] = pd.Categorical(df["finBERT"], ordered=True, categories=["negativ
 df = dp.add_relative_return(df, 'sp_25_pct', 'sp_75_pct')
 
 # Only take data for only specific stock
-df = df.loc[df["stock"] == "MS"]
+# df = df.loc[df["stock"] == "MRK"]
+df.sort_values(by=["stock", "date"], inplace=True)
 
 # Apply balancing to dataset
 df = dp.balance_dataframe(df, 'finBERT')
+df.sort_values(by=["stock", "date"], inplace=True)
 
 # Show the distribution of positive, neutral and negative labels
 df["finBERT"].value_counts().plot(kind="bar")
 plt.show()
+
+# Apply windowing
+dp.get_window_data(df, {'open': "mean", 'high': "mean", 'low': "mean", 'close': "mean", 'adj close': "mean",
+                        'volume': "mean", 'return': "mean", 'log_return': "sum", 'sp_mean': "mean", 'sp_var': "mean",
+                        'sp_10_pct': "mean", 'sp_25_pct': "mean", 'sp_50_pct': "mean", 'sp_75_pct': "mean",
+                        'sp_90_pct': "mean", 'under': "median", 'neutral': "median", 'out': "median"}, 3)
 
 
 ########################################################################################################################
@@ -56,16 +64,16 @@ y = df.loc[:, df.columns == "finBERT"].values.ravel()
 # Create train and test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, shuffle=True)
 
-# Standardize independent variable
+# Standardize independent variable - use this if there are no categorical independent variables
 # scaler = StandardScaler()
 # scaler.fit(X_train)
 # scaler.transform(X_train)
 # scaler.transform(X_test)
 
-# Define the ColumnTransformer with the desired transformers, required when dummy variables in independent variables
+# Standardize independent variable - use this if there are categorical independent variables
 ct = ColumnTransformer(
     transformers=[
-        ('standardization', StandardScaler(), [0])
+        ('standardization', StandardScaler(), [0, 1])
     ],
     remainder='passthrough'  # Pass through any remaining columns
 )
@@ -74,7 +82,7 @@ ct.transform(X_train)
 ct.transform(X_test)
 
 # Define Multinomial Logistic Regression model
-model = LogisticRegression(multi_class='multinomial', solver='lbfgs')
+model = LogisticRegression(multi_class='multinomial', solver='lbfgs', max_iter=1000)
 
 # Fit the model
 model.fit(X_train, y_train)
@@ -118,46 +126,46 @@ plt.show()
 # Multinomial Logistic Regression with regularization
 ########################################################################################################################
 
-# List of models to evaluate
-def get_models():
-    models = dict()
-    for p in [0.0, 0.0001, 0.001, 0.01, 0.1, 1.0]:
-        # Create name for model
-        key = '%.4f' % p
-
-        if p == 0.0:
-            # No penalty in this case
-            models[key] = LogisticRegression(multi_class='multinomial', solver='lbfgs', penalty=None)
-        else:
-            models[key] = LogisticRegression(multi_class='multinomial', solver='lbfgs', penalty='l2', C=p)
-
-    return models
-
-
-# Evaluate a given model using cross-validation
-def evaluate_model(model, X, y):
-    # define the evaluation procedure
-    cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
-    # evaluate the model
-    scores = cross_val_score(model, X, y, scoring='accuracy', cv=cv, n_jobs=-1)
-
-    return scores
-
-
-# Get the models to evaluate
-models = get_models()
-
-# Evaluate the models and store results
-results, names = list(), list()
-print("Accuracy for Multinomial Logistic Regression with regularization:")
-for name, model in models.items():
-    # Evaluate the model and collect the scores
-    scores = evaluate_model(model, X, y)
-    # Store the results
-    results.append(scores)
-    names.append(name)
-    # Summarize progress along the way
-    print('>{0} {1:.3f} ({2:.3f})'.format(name, np.mean(scores), np.std(scores)))
+# # List of models to evaluate
+# def get_models():
+#     models = dict()
+#     for p in [0.0, 0.0001, 0.001, 0.01, 0.1, 1.0]:
+#         # Create name for model
+#         key = '%.4f' % p
+#
+#         if p == 0.0:
+#             # No penalty in this case
+#             models[key] = LogisticRegression(multi_class='multinomial', solver='lbfgs', penalty=None)
+#         else:
+#             models[key] = LogisticRegression(multi_class='multinomial', solver='lbfgs', penalty='l2', C=p)
+#
+#     return models
+#
+#
+# # Evaluate a given model using cross-validation
+# def evaluate_model(model, X, y):
+#     # define the evaluation procedure
+#     cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
+#     # evaluate the model
+#     scores = cross_val_score(model, X, y, scoring='accuracy', cv=cv, n_jobs=-1)
+#
+#     return scores
+#
+#
+# # Get the models to evaluate
+# models = get_models()
+#
+# # Evaluate the models and store results
+# results, names = list(), list()
+# print("Accuracy for Multinomial Logistic Regression with regularization:")
+# for name, model in models.items():
+#     # Evaluate the model and collect the scores
+#     scores = evaluate_model(model, X, y)
+#     # Store the results
+#     results.append(scores)
+#     names.append(name)
+#     # Summarize progress along the way
+#     print('>{0} {1:.3f} ({2:.3f})'.format(name, np.mean(scores), np.std(scores)))
 
 ########################################################################################################################
 # Further ideas
