@@ -1,12 +1,13 @@
 import json
 import time
-from datetime import datetime, timedelta
 import requests
+from datetime import datetime, timedelta
+from Code.Dataprocessing import resources as r
 
 
 def get_av_news_data(tickers: list, time_from: str, time_to="", sort="EARLIEST", limit=50):
     date_from = datetime.strptime(time_from, "%Y%m%dT%H%M%S")
-    nextday = date_from + timedelta(days=1)
+    nextday = date_from + timedelta(days=30)
     date_from = datetime.strftime(date_from, "%Y%m%dT%H%M")
     if time_to:
         date_to = datetime.strptime(time_to, "%Y%m%dT%H%M")
@@ -26,7 +27,7 @@ def get_av_news_data(tickers: list, time_from: str, time_to="", sort="EARLIEST",
     if "No articles found." in r.text or "\"items\": \"0\"" in r.text:
         data = {}
         last_date = datetime.strftime(nextday, "%Y%m%dT%H%M")
-        print(last_date)
+        print(tickers[0] + ": No articles found. Last date: " + last_date)
     else:
         data = r.json()
         data = data["feed"]
@@ -36,38 +37,32 @@ def get_av_news_data(tickers: list, time_from: str, time_to="", sort="EARLIEST",
     return data, last_date
 
 
-fetch_all = []
-date = "20230301T000000"
-for i in range(0, 3):
-    fetch, date = get_av_news_data(tickers=["WMT"], time_from=date)
-    fetch_all.extend(fetch)
-    time.sleep(5)
+def get_news_for_stock(stock: str, start_date: str):
+    fetch_lst = []
+    date = start_date
+    for i in range(0, 16):
+        if datetime.strptime(date, "%Y%m%dT%H%M%S") < datetime.strptime("20230501T000000", "%Y%m%dT%H%M%S"):
+            fetch, date = get_av_news_data(tickers=[stock], time_from=date, limit=1000)
+            fetch_lst.extend(fetch)
+            time.sleep(1)
+        else:
+            break
+    return fetch_lst
 
+
+def get_news(start_date: str):
+    result = []
+    for stock in r.sp500:
+        try:
+            fetch = get_news_for_stock(stock, start_date)
+            result.extend(fetch)
+        except Exception as e:
+            print("Fetch failed for stock:" + stock)
+            print(f"Error details: {e}")
+    return result
+
+
+fetch_all = get_news("20230101T000000")
 
 with open(r'C:\Users\chris\IdeaProjects\masterProject\Dataset\av_data.json', 'w') as file:
     json.dump(fetch_all, file, indent=3)
-
-# # filtered_records = [record for record in data["feed"] if float(record["ticker_sentiment"][0]["relevance_score"]) > 0.5]
-# # len(record['ticker_sentiment']) == 1 and
-# def filter_data_by_relevance_score(data, ticker):
-#     filtered_data = []
-#     for record in data["feed"]:
-#         max_score = 0
-#         max_ticker = ""
-#         for ticker_sentiment in record["ticker_sentiment"]:
-#             relevance_score = float(ticker_sentiment["relevance_score"])
-#             ticker = ticker_sentiment["ticker"]
-#             if relevance_score > max_score:
-#                 max_score = relevance_score
-#                 max_ticker += ticker
-#         if max_ticker == ticker:
-#             filtered_data.append(record)
-#     return filtered_data
-#
-#
-# filtered_records = filter_data_by_relevance_score(data, "MS")
-# # Print the filtered records
-# cnt = 0
-# for record in filtered_records:
-#     cnt += 1
-# print(cnt)
