@@ -47,8 +47,8 @@ def calculate_statistics(symbols, start_date, end_date):
 
 
 # Define the date range
-start_date = '2010-01-01'
-end_date = '2020-12-31'
+start_date = '2023-01-01'
+end_date = '2023-07-19'
 
 # Calculate the statistics
 stats, errors = calculate_statistics(r.sp500, start_date, end_date)
@@ -58,11 +58,11 @@ result_df = pd.DataFrame({'Date': stats.index,
                           'Mean': stats['Mean'],
                           'Variance': stats['Variance'],
                           '10th_Percentile': stats['10th Percentile'],
-                          '20th_Percentile': stats['10th Percentile'],
+                          '20th_Percentile': stats['20th Percentile'],
                           '25th_Percentile': stats['25th Percentile'],
                           '50th_Percentile': stats['50th Percentile'],
                           '75th_Percentile': stats['75th Percentile'],
-                          '80th_Percentile': stats['75th Percentile'],
+                          '80th_Percentile': stats['80th Percentile'],
                           '90th_Percentile': stats['90th Percentile']})
 
 # Lower all column names
