@@ -1,7 +1,7 @@
 import json
-import csv
-import codecs
 from datetime import datetime
+
+import pandas as pd
 
 
 def get_max_relevance_score(record):
@@ -16,7 +16,7 @@ def get_max_relevance_score(record):
     return max_ticker, max_score
 
 
-def convert_to_csv(file_path):
+def convert_to_pd(file_path):
     with open(file_path) as file:
         data = json.load(file)
 
@@ -27,17 +27,8 @@ def convert_to_csv(file_path):
         result.append({'title': record["title"], 'summary': record["summary"], 'date': date, 'stock': ticker,
                        'relevance': relevance})
 
-    fieldnames = ['title', 'summary', 'date', 'stock', 'relevance']
-    with codecs.open(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_data.csv", 'w', 'utf-8-sig') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-        # Write the headers to the CSV file
-        writer.writeheader()
-
-        # Write each record as a row in the CSV file
-        writer.writerows(result)
-
-    return result
+    return pd.DataFrame(result).drop_duplicates()
 
 
-# d = convert_to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_data.json")
+df = convert_to_pd(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_data.json")
+df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_data.csv")
