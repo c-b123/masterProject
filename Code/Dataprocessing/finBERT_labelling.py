@@ -24,7 +24,7 @@ class NewsDataset(Dataset):
 
 
 # Load dataset
-d = load_dataset("csv", data_files="/content/drive/MyDrive/masterProject/av_data_processed.csv")
+d = load_dataset("csv", data_files="/content/drive/MyDrive/masterProject/av_processed.csv")
 d = d["train"]
 
 # Instantiate dataset
@@ -47,4 +47,4 @@ for out in tqdm(pipe(dataset, batch_size=8), total=len(dataset)):
 d = d.add_column("finBERT", results)
 
 # Save the DataFrame as a CSV file
-# d.to_csv("/content/drive/MyDrive/masterProject/av_data_labelled.csv", index=False)
+# d.to_csv("/content/drive/MyDrive/masterProject/av_labelled.csv", index=False)
