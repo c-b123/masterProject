@@ -2,6 +2,7 @@ import json
 import time
 import requests
 from datetime import datetime, timedelta
+import keys
 from Code.Dataprocessing import resources as r
 
 
@@ -21,7 +22,7 @@ def get_av_news_data(tickers: list, time_from: str, time_to="", sort="EARLIEST",
           + date_to \
           + '&sort=' + sort \
           + '&limit=' + str(limit) \
-          + '&apikey=5224NQCCUYJH71Z3'
+          + '&apikey=' + keys.av_api_key
     print(url)
     r = requests.get(url)
     if "No articles found." in r.text or "\"items\": \"0\"" in r.text:

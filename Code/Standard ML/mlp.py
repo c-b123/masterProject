@@ -11,8 +11,9 @@ from sklearn.model_selection import RepeatedStratifiedKFold, cross_val_score, tr
     StratifiedShuffleSplit, GridSearchCV
 
 # Read with finBERT labelled csv file
-file = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\ar_labelled_market.csv"
+file = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_labelled_market.csv"
 df = pd.read_csv(file, index_col=0)
+
 
 ########################################################################################################################
 # Data preprocessing
@@ -25,7 +26,6 @@ df["finBERT"] = pd.Categorical(df["finBERT"], ordered=True, categories=["negativ
 df = dp.add_relative_return(df, 'sp_10_pct', 'sp_90_pct')
 
 # Only take data for only specific stock
-# df = df.loc[df["stock"] == "MRK"]
 df.sort_values(by=["stock", "date"], inplace=True)
 
 # Apply balancing to dataset
@@ -36,9 +36,9 @@ df.sort_values(by=["stock", "date"], inplace=True)
 dp.get_window_data(df, {'open': "mean", 'high': "mean", 'low': "mean", 'close': "mean", 'adj close': "mean",
                         'volume': "mean", 'return': "mean", 'log_return': "sum", 'sp_mean': "mean", 'sp_var': "mean",
                         'sp_10_pct': "mean", 'sp_25_pct': "mean", 'sp_50_pct': "mean", 'sp_75_pct': "mean",
-                        'sp_90_pct': "mean", 'under': "median", 'neutral': "median", 'out': "median"}, 3)
+                        'sp_90_pct': "mean", 'under': "min", 'neutral': "median", 'out': "max"}, 3)
 
-df = df.sample(n=50)
+# df = df.sample(n=50)
 df["finBERT"].value_counts().plot(kind="bar")
 plt.show()
 
@@ -78,16 +78,16 @@ X_test = ct.transform(X_test)
 ########################################################################################################################
 
 # Define model
-model = MLPClassifier(early_stopping=True, validation_fraction=0.2, n_iter_no_change=25)
+model = MLPClassifier(early_stopping=True, validation_fraction=0.3, n_iter_no_change=100)
 
 # Define parameter grid
 param_grid = {
-    'hidden_layer_sizes': [(150, 100, 50, 30), (120, 80, 40, 9), (100, 50, 30, 3)],
-    'max_iter': [200, 300, 500],
-    'activation': ['tanh', 'relu'],
-    'solver': ['sgd', 'adam'],
-    'alpha': [0.0001, 0.05],
-    'learning_rate': ['constant', 'adaptive'],
+    'hidden_layer_sizes': [(100, 50, 30)],
+    'max_iter': [5000],
+    'activation': ['tanh'],
+    'solver': ['adam'],
+    'alpha': [0.001, 0.01, 0.1, 1],
+    'learning_rate': ['constant'],
 }
 
 grid = GridSearchCV(model, param_grid, n_jobs=-1, cv=5, verbose=3)
@@ -101,7 +101,7 @@ print(grid.best_params_)
 ########################################################################################################################
 
 # Define model
-model = MLPClassifier()
+model = MLPClassifier(early_stopping=True, validation_fraction=0.3, n_iter_no_change=100)
 model.set_params(**grid.best_params_)
 
 # Fit model
@@ -114,7 +114,7 @@ y_hat = model.predict(X_test)
 plt.plot(model.loss_curve_)
 plt.title("Loss Curve", fontsize=14)
 plt.xlabel('Iterations')
-plt.ylabel('Cost')
+plt.ylabel('Loss')
 plt.show()
 
 # Get classification report
