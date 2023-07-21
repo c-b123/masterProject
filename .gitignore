@@ -11,6 +11,5 @@
 /Dataset/av_processed.csv
 /Dataset/av_labelled.csv
 /Dataset/av_price.csv
-/Dataset/av_labelled_market.csv
 /Dataset/av_labelled_market_gpt35.csv
 /keys.py
