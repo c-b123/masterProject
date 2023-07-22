@@ -13,7 +13,7 @@ openai.api_key = keys.oa_api_key
 
 # Read dataset
 d = pd.read_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\financial_phrasebank_allagree.csv")
-d = d[:3]
+d = d.sample(n=100, random_state=42, ignore_index=True)
 
 
 # Function to get sentiment from GPT-3.5 using OpenAI API
