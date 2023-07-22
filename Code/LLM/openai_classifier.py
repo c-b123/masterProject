@@ -6,14 +6,14 @@ import keys
 # Define api key
 openai.api_key = keys.oa_api_key
 
-# Print all available models
-models = openai.Model.list()
-for model in models["data"]:
-    print(model.id)
+# # Print all available models
+# models = openai.Model.list()
+# for model in models["data"]:
+#     print(model.id)
 
 # Read dataset
-d = pd.read_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_labelled_market.csv", index_col=0)
-d = d[:100]
+d = pd.read_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\financial_phrasebank_allagree.csv")
+d = d[:3]
 
 
 # Function to get sentiment from GPT-3.5 using OpenAI API
@@ -22,10 +22,13 @@ def get_sentiment(text):
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system",
-             "content": "You are an AI language model trained to analyze and detect the sentiment of news summaries."},
+             "content": "You are an AI language model trained to analyze and detect the sentiment of"
+                        "financial news summaries. You consider the provided financial news summaries from the"
+                        "view-point of an investor only."},
             {'role': 'user',
-             'content': f"Analyze the following news summary and determine if the sentiment is: positive, negative or"
-                        f"neutral. Return only a single word, either positive, negative or neutral: {text}"}],
+             'content': f"Analyze the following financial news summary and determine if it has a positive, negative, or"
+                        f"neutral influence on the stock price. Return only a single word, either positive, negative or"
+                        f"neutral: {text}"}],
         max_tokens=3,
         n=1,
         stop=None,
@@ -38,6 +41,6 @@ def get_sentiment(text):
 
 
 # Apply get_sentiment to dataset
-d['gpt-3.5-turbo'] = d['summary'].apply(get_sentiment)
+d['gpt-3.5-turbo'] = d['sentence'].apply(get_sentiment)
 
-d.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_labelled_market_gpt35.csv")
+d.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\financial_phrasebank_allagree_gpt35.csv")
