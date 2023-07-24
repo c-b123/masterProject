@@ -1,3 +1,5 @@
+tickers = ["DAL", "EBAY", "AMGN", "JNJ", "MS", "MU", "NVDA", "NFLX"]
+
 company_tickers = [
     'MRK', 'MS', 'MU', 'NVDA', 'EBAY', 'NFLX', 'QQQ', 'VZ', 'DAL',
     'JNJ', 'QCOM', 'PFE', 'GSK', 'SNY', 'MRK.DE', 'GS', 'JPM', 'UBS', 'WFC',

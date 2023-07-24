@@ -14,3 +14,6 @@
 /Dataset/av_labelled_market_gpt35.csv
 /keys.py
 /Dataset/financial_phrasebank_allagree.csv
+/Dataset/financial_phrasebank_allagree_gpt35.csv
+/Dataset/av_raw.csv
+/Dataset/av_clean.csv

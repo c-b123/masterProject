@@ -1,7 +1,7 @@
 import pandas as pd
 import yfinance as yf
 import yfinance.shared as shared
-import resources as r
+from Code import resources as r
 
 
 def calculate_statistics(symbols, start_date, end_date):

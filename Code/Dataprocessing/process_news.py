@@ -1,6 +1,6 @@
 import pandas as pd
 import json
-import resources as sto
+from Code import resources as sto
 
 sep_tokens = [i * -0.01 for i in range(1, len(sto.company_tickers) + 1)]
 comp_token = {}

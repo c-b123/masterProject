@@ -1,12 +1,12 @@
-import json
 import time
+import pandas as pd
 import requests
-from datetime import datetime, timedelta
 import keys
-from Code.Dataprocessing import resources as r
+from datetime import datetime, timedelta
+from Code import resources as r
 
 
-def get_av_news_data(tickers: list, time_from: str, time_to="", sort="EARLIEST", limit=50):
+def get_stock_news_date(tickers: list, time_from: str, time_to="", sort="EARLIEST", limit=50):
     date_from = datetime.strptime(time_from, "%Y%m%dT%H%M%S")
     nextday = date_from + timedelta(days=30)
     date_from = datetime.strftime(date_from, "%Y%m%dT%H%M")
@@ -38,12 +38,12 @@ def get_av_news_data(tickers: list, time_from: str, time_to="", sort="EARLIEST",
     return data, last_date
 
 
-def get_news_for_stock(stock: str, start_date: str):
+def get_consecutive_stock_news(stock: str, start_date: str):
     fetch_lst = []
     date = start_date
     for i in range(0, 16):
-        if datetime.strptime(date, "%Y%m%dT%H%M%S") < datetime.strptime("20230501T000000", "%Y%m%dT%H%M%S"):
-            fetch, date = get_av_news_data(tickers=[stock], time_from=date, limit=1000)
+        if datetime.strptime(date, "%Y%m%dT%H%M%S") < datetime.strptime("20230715T000000", "%Y%m%dT%H%M%S"):
+            fetch, date = get_stock_news_date(tickers=[stock], time_from=date, limit=1000)
             fetch_lst.extend(fetch)
             time.sleep(1)
         else:
@@ -53,9 +53,9 @@ def get_news_for_stock(stock: str, start_date: str):
 
 def get_news(start_date: str):
     result = []
-    for stock in r.sp500:
+    for stock in r.tickers:
         try:
-            fetch = get_news_for_stock(stock, start_date)
+            fetch = get_consecutive_stock_news(stock, start_date)
             result.extend(fetch)
         except Exception as e:
             print("Fetch failed for stock:" + stock)
@@ -63,7 +63,6 @@ def get_news(start_date: str):
     return result
 
 
-fetch_all = get_news("20230101T000000")
-
-with open(r'C:\Users\chris\IdeaProjects\masterProject\Dataset\av_data.json', 'w') as file:
-    json.dump(fetch_all, file, indent=3)
+fetch_all = get_news("20220301T000000")
+df = pd.DataFrame(fetch_all)
+df.to_csv(r'C:\Users\chris\IdeaProjects\masterProject\Dataset\av_raw.csv', index=False)
