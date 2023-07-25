@@ -1,8 +1,10 @@
 import ast
 from datetime import datetime
+
 import matplotlib.pyplot as plt
 import pandas
 import pandas as pd
+
 from Code import resources as r
 
 
@@ -74,9 +76,17 @@ plt.ylabel('Count')
 plt.title('Stock News Distribution')
 plt.show()
 
+# Histogram of sentiment distribution
+hist_sto = df["overall_sentiment_label"].value_counts().plot(kind='bar')
+hist_sto.set_xticklabels(hist_sto.get_xticklabels(), rotation=6)
+plt.xlabel('Labels')
+plt.ylabel('Count')
+plt.title('Sentiment Label Distribution')
+plt.show()
+
 # Histogram of relevance distribution
 bin_rel = [0, 0.2, 0.4, 0.6, 0.8, 1]
-bin_rel_labels = ['<0.2', '0.2-0.4', '0.4-0.6', '0.6-0.8', '0.8-1']
+bin_rel_labels = ['0-0.2', '0.2-0.4', '0.4-0.6', '0.6-0.8', '0.8-1']
 hist_rel = pd.cut(df['relevance'], bins=bin_rel, labels=bin_rel_labels, right=False).value_counts().sort_index().plot(
     kind='bar')
 hist_rel.set_xticklabels(hist_rel.get_xticklabels(), rotation=0)
