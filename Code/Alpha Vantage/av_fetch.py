@@ -65,4 +65,4 @@ def get_news(start_date: str):
 
 fetch_all = get_news("20220301T000000")
 df = pd.DataFrame(fetch_all)
-df.to_csv(r'C:\Users\chris\IdeaProjects\masterProject\Dataset\av_raw.csv', index=False)
+# df.to_csv(r'C:\Users\chris\IdeaProjects\masterProject\Dataset\av_raw.csv', index=False)

@@ -11,6 +11,7 @@ from Code import resources as r
 def convert_date(date_string):
     parsed_date = datetime.strptime(date_string, "%Y%m%dT%H%M%S")
     formatted_date = parsed_date.strftime("%Y-%m-%d")
+
     return formatted_date
 
 
@@ -90,12 +91,11 @@ bin_rel_labels = ['0-0.2', '0.2-0.4', '0.4-0.6', '0.6-0.8', '0.8-1']
 hist_rel = pd.cut(df['relevance'], bins=bin_rel, labels=bin_rel_labels, right=False).value_counts().sort_index().plot(
     kind='bar')
 hist_rel.set_xticklabels(hist_rel.get_xticklabels(), rotation=0)
-# Add labels and title to the plot for better understanding
 plt.xlabel('Relevance Bins')
 plt.ylabel('Count')
 plt.title('Relevance Score Distribution')
 plt.show()
 
-# # Save as csv file
-# df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_clean.csv", index=False,
-#           columns=["title", "date", "summary", "stock", "relevance"])
+# Save as csv file
+df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_clean.csv", index=False,
+          columns=["title", "summary", "date", "stock", "relevance"])

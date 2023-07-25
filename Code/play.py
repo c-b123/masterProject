@@ -1,9 +1,6 @@
 import pandas as pd
-from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
-
-df = pd.read_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_raw.csv")
 
 
 # df = pd.read_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\financial_phrasebank_allagree_gpt35.csv")
