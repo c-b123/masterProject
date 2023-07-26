@@ -5,7 +5,7 @@ from transformers import pipeline
 from huggingface_hub import login
 import keys
 
-login(token=keys.hf_api_key)
+login(token=keys.hf_r_api_key)
 
 ########################################################################################################################
 # This script needs GPU acceleration e.g. via Google Colab
