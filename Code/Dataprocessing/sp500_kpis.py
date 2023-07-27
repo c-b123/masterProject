@@ -47,8 +47,8 @@ def calculate_statistics(symbols, start_date, end_date):
 
 
 # Define the date range
-start_date = '2023-01-01'
-end_date = '2023-07-19'
+start_date = '2022-03-01'
+end_date = '2023-07-25'
 
 # Calculate the statistics
 stats, errors = calculate_statistics(r.sp500, start_date, end_date)
@@ -75,8 +75,8 @@ result_df['date'] = pd.to_datetime(result_df['date'], utc=True).dt.date
 # Convert "date" column to type str
 result_df['date'].astype(str)
 
-# Reset index to date
-result_df.set_index("date", inplace=True)
+# # Reset index to date
+# result_df.set_index("date", inplace=True)
 
 # Store the results as csv file
-# result_df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\sp500_kpis.csv")
+# result_df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\sp500_kpis.csv", index=False)

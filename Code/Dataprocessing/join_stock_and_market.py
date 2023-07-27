@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Read ar_labelled, containing stock data and finBERT labels
-ar_labelled = pd.read_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_labelled.csv", index_col=0)
+ar_labelled = pd.read_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_train.csv", index_col=0)
 
 # Read sp500_kpis, containing market data
 sp500_kpis = pd.read_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\sp500_kpis.csv")
@@ -21,4 +21,4 @@ ar_labelled_market.rename(columns={'mean': "sp_mean", 'variance': "sp_var",
                           errors="raise", inplace=True)
 
 # Export merged dataset as csv
-ar_labelled_market.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_labelled_market.csv")
+# ar_labelled_market.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_train.csv", index=False)

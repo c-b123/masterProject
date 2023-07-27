@@ -20,7 +20,7 @@ def get_stock_data(ticker, start_date, end_date):
     Returns
     -------
     pandas.DataFrame
-        dataframe with date, open, high, low, close, adjusted close, volume, return, and log return as columns
+        dataframe with date, open, high, low, close, adjusted close, volume, and return as columns
     """
 
     try:
@@ -39,9 +39,8 @@ def get_stock_data(ticker, start_date, end_date):
         # Convert "date" column to type str to allow merging
         stock_data['date'].astype(str)
 
-        # Calculate return and log return
+        # Calculate return
         stock_data["return"] = stock_data["adj close"].pct_change()
-        stock_data["log_return"] = np.log(1 + stock_data["return"])
 
         # Drop nan
         stock_data.dropna(inplace=True, ignore_index=True)

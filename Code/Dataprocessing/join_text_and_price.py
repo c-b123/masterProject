@@ -6,8 +6,8 @@ import stockdata as sd
 ########################################################################################################################
 
 # Read analyst_ratings_processed file
-file_name = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_processed.csv"
-df = pd.read_csv(file_name, usecols=["summary", "date", "stock"])
+file_name = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_train.csv"
+df = pd.read_csv(file_name)
 
 # Drop rows containing nan
 df.dropna(inplace=True)
@@ -25,13 +25,12 @@ df['date'].astype(str)
 ########################################################################################################################
 
 # Create empty data frame with required columns
-comp_info = pd.DataFrame(columns=["date", "stock", "open", "high", "low", "close", "adj close", "volume", "return",
-                                  "log_return"])
+comp_info = pd.DataFrame(columns=["date", "stock", "open", "high", "low", "close", "adj close", "volume", "return"])
 
 # Concatenate each stock data file to one large stock file
 for ticker in df["stock"].unique().tolist():
     # Fetch stock data from yahoo
-    sdata = sd.get_stock_data(ticker, start_date="2023-01-01", end_date="2023-07-19")
+    sdata = sd.get_stock_data(ticker, start_date="2022-03-01", end_date="2023-07-25")
 
     # Add company ticker to allow merging on data and ticker
     sdata.insert(1, 'stock', ticker)
@@ -66,4 +65,4 @@ del comp_info
 # Store dataframe as csv
 ########################################################################################################################
 
-# df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_price.csv")
+# df.to_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_train.csv", index=False)
