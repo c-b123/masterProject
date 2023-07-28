@@ -1,8 +1,19 @@
 import evaluate
 import numpy as np
+import pandas as pd
 from datasets import load_dataset, ClassLabel
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
 from transformers import DataCollatorWithPadding
+
+from Code.Dataprocessing import df_processing as dp
+
+df = pd.read_csv(r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_train.csv")
+
+df = dp.add_relative_return_ordinal(df, "sp_20_pct", "sp_80_pct")
+
+df = dp.balance_via_oversampling(df, "relative_return")
+
+print(df.value_counts(subset="relative_return"))
 
 # Load data
 labels = ClassLabel(num_classes=3, names=["negative", "neutral", "positive"])
@@ -10,8 +21,8 @@ id2label = {0: "negative", 1: "neutral", 2: "positive"}
 label2id = {"negative": 0, "neutral": 1, "positive": 2}
 
 # Load dataset
-dataset = load_dataset("csv", data_files="/content/drive/MyDrive/masterProject/av_train.csv")
-dataset = dataset.rename_column("finBERT", "label")
+dataset = load_dataset(df)
+dataset = dataset.rename_column("relative_return", "label")
 dataset = dataset.rename_column("summary", "text")
 
 # Split into 80% training and 20% validation
@@ -39,13 +50,13 @@ model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-unca
 # Set hyperparameters
 training_args = TrainingArguments(
     output_dir="distilBERT_finetuning",
-    learning_rate=2e-5,
-    per_device_train_batch_size=32,
-    per_device_eval_batch_size=32,
+    learning_rate=3e-5,
+    per_device_train_batch_size=128,
+    per_device_eval_batch_size=128,
     num_train_epochs=1,
-    weight_decay=0.01,
+    weight_decay=0,
     evaluation_strategy="steps",
-    push_to_hub=True,
+    # push_to_hub=True,
     eval_steps=10,
     max_steps=100,
     save_steps=0,

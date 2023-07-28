@@ -31,7 +31,7 @@ df = dp.add_relative_return(df, 'sp_25_pct', 'sp_75_pct')
 df.sort_values(by=["stock", "date"], inplace=True)
 
 # Apply balancing to dataset
-df = dp.balance_dataframe(df, 'finBERT')
+df = dp.balance_via_undersampling(df, 'finBERT')
 df.sort_values(by=["stock", "date"], inplace=True)
 
 # Show the distribution of positive, neutral and negative labels

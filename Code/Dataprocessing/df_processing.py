@@ -103,7 +103,7 @@ def lag_dataframe(dataframe: pandas.DataFrame, non_lag_columns: list, num_lag_st
     return lagged_dataframe
 
 
-def balance_dataframe(dataframe: pandas.DataFrame, target_column: str):
+def balance_via_undersampling(dataframe: pandas.DataFrame, target_column: str):
     """
     Balances a pandas dataframe according to the specified target column. Requires a target column. Balancing is done
     by dropping rows of the more frequent categories. Remaining rows are selected randomly.
@@ -127,6 +127,30 @@ def balance_dataframe(dataframe: pandas.DataFrame, target_column: str):
 
     # Balance dataframe, samples get selected randomly
     balanced_df = dataframe.groupby(target_column).apply(lambda x: x.sample(min_class_count, random_state=42))
+    balanced_df = balanced_df.sample(frac=1, random_state=42).reset_index(drop=True)
+
+    return balanced_df
+
+
+def balance_via_oversampling(dataframe: pandas.DataFrame, target_column: str):
+    # Count the number of occurrences
+    class_counts = dataframe[target_column].value_counts()
+    max_class_count = class_counts.max()
+
+    # Assuming you want to balance the DataFrame by matching the size of the majority class
+    class_1 = dataframe[dataframe[target_column] == "negative"]
+    class_2 = dataframe[dataframe[target_column] == "neutral"]
+    class_3 = dataframe[dataframe[target_column] == "positive"]
+
+    # Step 3: Randomly sample from each class with replacement to achieve the desired size
+    oversampled_class_0 = class_1.sample(n=max_class_count, replace=True)
+    oversampled_class_1 = class_2.sample(n=max_class_count, replace=True)
+    oversampled_class_2 = class_3.sample(n=max_class_count, replace=True)
+
+    # Step 4: Concatenate the oversampled classes with the original classes
+    balanced_df = pandas.concat([oversampled_class_0, oversampled_class_1, oversampled_class_2])
+
+    # Shuffle the DataFrame to ensure the class distribution is not biased
     balanced_df = balanced_df.sample(frac=1, random_state=42).reset_index(drop=True)
 
     return balanced_df
@@ -191,10 +215,10 @@ def add_relative_return_ordinal(dataframe, lower_percentile, upper_percentile):
     """
 
     # Create a new column and initialize with default value
-    dataframe['relative_return'] = 2
+    dataframe['relative_return'] = "neutral"
 
     # Compare 'return' with the percentiles and assign labels
-    dataframe.loc[dataframe['return'] < dataframe[lower_percentile], 'relative_return'] = 1
-    dataframe.loc[dataframe['return'] > dataframe[upper_percentile], 'relative_return'] = 3
+    dataframe.loc[dataframe['return'] < dataframe[lower_percentile], 'relative_return'] = "negative"
+    dataframe.loc[dataframe['return'] > dataframe[upper_percentile], 'relative_return'] = "positive"
 
     return dataframe
