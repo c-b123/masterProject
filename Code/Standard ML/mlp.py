@@ -11,8 +11,8 @@ from sklearn.model_selection import RepeatedStratifiedKFold, cross_val_score, tr
     StratifiedShuffleSplit, GridSearchCV
 
 # Read with finBERT labelled csv file
-file = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_labelled_market.csv"
-df = pd.read_csv(file, index_col=0)
+file = r"C:\Users\chris\IdeaProjects\masterProject\Dataset\av_train.csv"
+df = pd.read_csv(file)
 
 
 ########################################################################################################################
@@ -23,20 +23,20 @@ df = pd.read_csv(file, index_col=0)
 df["finBERT"] = pd.Categorical(df["finBERT"], ordered=True, categories=["negative", "neutral", "positive"])
 
 # Add relative return
-df = dp.add_relative_return(df, 'sp_10_pct', 'sp_90_pct')
+df = dp.add_relative_return(df, 'sp_20_pct', 'sp_80_pct')
 
-# Only take data for only specific stock
-df.sort_values(by=["stock", "date"], inplace=True)
+# # Only take data for only specific stock
+# df.sort_values(by=["stock", "date"], inplace=True)
 
 # Apply balancing to dataset
 df = dp.balance_via_undersampling(df, 'finBERT')
-df.sort_values(by=["stock", "date"], inplace=True)
+# df.sort_values(by=["stock", "date"], inplace=True)
 
-# Apply windowing
-dp.get_window_data(df, {'open': "mean", 'high': "mean", 'low': "mean", 'close': "mean", 'adj close': "mean",
-                        'volume': "mean", 'return': "mean", 'log_return': "sum", 'sp_mean': "mean", 'sp_var': "mean",
-                        'sp_10_pct': "mean", 'sp_25_pct': "mean", 'sp_50_pct': "mean", 'sp_75_pct': "mean",
-                        'sp_90_pct': "mean", 'under': "min", 'neutral': "median", 'out': "max"}, 3)
+# # Apply windowing
+# dp.get_window_data(df, {'open': "mean", 'high': "mean", 'low': "mean", 'close': "mean", 'adj close': "mean",
+#                         'volume': "mean", 'return': "mean", 'log_return': "sum", 'sp_mean': "mean", 'sp_var': "mean",
+#                         'sp_10_pct': "mean", 'sp_25_pct': "mean", 'sp_50_pct': "mean", 'sp_75_pct': "mean",
+#                         'sp_90_pct': "mean", 'under': "min", 'neutral': "median", 'out': "max"}, 3)
 
 # df = df.sample(n=50)
 df["finBERT"].value_counts().plot(kind="bar")
@@ -61,7 +61,7 @@ y = df.loc[:, df.columns == "finBERT"].values.ravel()
 ########################################################################################################################
 
 # Create train and test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, shuffle=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, shuffle=True)
 
 # Standardize independent variable - use this if there are categorical independent variables
 ct = ColumnTransformer(
@@ -83,11 +83,12 @@ model = MLPClassifier(early_stopping=True, validation_fraction=0.3, n_iter_no_ch
 # Define parameter grid
 param_grid = {
     'hidden_layer_sizes': [(100, 50, 30)],
-    'max_iter': [5000],
+    'max_iter': [200],
     'activation': ['tanh'],
-    'solver': ['adam'],
-    'alpha': [0.001, 0.01, 0.1, 1],
-    'learning_rate': ['constant'],
+    'solver': ['sgd'],
+    'alpha': [0.001],
+    'learning_rate': ['adaptive'],
+    'learning_rate_init': [0.0001]
 }
 
 grid = GridSearchCV(model, param_grid, n_jobs=-1, cv=5, verbose=3)
@@ -101,7 +102,7 @@ print(grid.best_params_)
 ########################################################################################################################
 
 # Define model
-model = MLPClassifier(early_stopping=True, validation_fraction=0.3, n_iter_no_change=100)
+model = MLPClassifier(early_stopping=True, validation_fraction=0.3, n_iter_no_change=100, max_iter=200)
 model.set_params(**grid.best_params_)
 
 # Fit model
@@ -111,10 +112,12 @@ model.fit(X_train, y_train)
 y_hat = model.predict(X_test)
 
 # Print loss curve
-plt.plot(model.loss_curve_)
+plt.plot(model.loss_curve_, label='Training Loss')
+plt.plot(model.validation_scores_, label='Validation Accuracy')#, color='red')
 plt.title("Loss Curve", fontsize=14)
 plt.xlabel('Iterations')
 plt.ylabel('Loss')
+plt.legend()
 plt.show()
 
 # Get classification report
